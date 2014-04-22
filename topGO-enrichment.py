@@ -68,18 +68,18 @@ def go_enrichment(gene_association, subset, algo, minnode):
     # names(genes_of_interest) <- refset
     # because Python cannot assign to values
     genes_of_interest = R.setNames(genes_of_interest, refset)
-    for o in ["MF"]:
+    for o in ["MF", "BP", "CC"]:
         GOdata = R.new("topGOdata",
                        ontology=o,
                        allGenes=genes_of_interest,
                        annot=R["annFUN.gene2GO"],
                        gene2GO=geneID2GO,
                        nodeSize=minnode)
-    pvalueHash = R.score(R.runTest(GOdata, algorithm=algo, statistic="fisher"))
-    terms, pvalues, padjusted = adjust_pvalues(pvalueHash)
-    for i, t in enumerate(terms):
-        if pvalues[i] < 0.05:
-            significant.append([t, str(pvalues[i]), str(padjusted[i])])
+        pvalueHash = R.score(R.runTest(GOdata, algorithm=algo, statistic="fisher"))
+        terms, pvalues, padjusted = adjust_pvalues(pvalueHash)
+        for i, t in enumerate(terms):
+            if pvalues[i] < 0.05:
+                significant.append([t, str(pvalues[i]), str(padjusted[i])])
     return significant
 
 
