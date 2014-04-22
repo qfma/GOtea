@@ -37,6 +37,6 @@ def read_gene_association(source):
 def main():
     GOdict = read_gene_association(args.gene_association)
     for g in GOdict:
-        print g,"\t","\t".join(GOdict[g])
+        print g,"\t",",".join(GOdict[g])
 if __name__ == "__main__":
     main()
