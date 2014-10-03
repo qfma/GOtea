@@ -47,12 +47,8 @@ def init_topGO():
     return topGO
 
 
-def adjust_pvalues(pvalueHash):
+def adjust_pvalues(terms, pvalues):
     importr("qvalue")
-    terms, pvalues = [], []
-    for k, v in pvalueHash.iteritems():
-        terms.append(k)
-        pvalues.append(v)
     padjusted = R["p.adjust"](pvalues, method="fdr")
     return terms, pvalues, padjusted
 
@@ -75,8 +71,10 @@ def go_enrichment(gene_association, subset, algo, minnode):
                        annot=R["annFUN.gene2GO"],
                        gene2GO=geneID2GO,
                        nodeSize=minnode)
-        pvalueHash = R.score(R.runTest(GOdata, algorithm=algo, statistic="fisher"))
-        terms, pvalues, padjusted = adjust_pvalues(pvalueHash)
+        test = R.runTest(GOdata, algorithm=algo, statistic="fisher")
+        pvalues = list(R.score(test))
+        terms = list(R.names(R.score(test)))
+        terms, pvalues, padjusted = adjust_pvalues(terms, pvalues)
         for i, t in enumerate(terms):
             if pvalues[i] < 0.05:
                 significant.append([t, str(pvalues[i]), str(padjusted[i])])
@@ -90,6 +88,7 @@ def main():
                                 args.algorithm,
                                 args.min)
     name = os.path.splitext(args.test_ids)[0]+".ora"
+    print name
     with open(name, "wb") as handle:
         handle.write("#GOTERM\tP-Value\tFDR-adjusted\n")
         for s in significant:
